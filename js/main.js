@@ -1,6 +1,6 @@
 import * as THREE from '../node_modules/three/build/three.module.js';
 import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
-import { RoundedBoxGeometry } from './threejs/examples/jsm/geometries/RoundedBoxGeometry.js'
+import { RoundedBoxGeometry } from '../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js'
 
 class App {
 	constructor() {
@@ -28,7 +28,7 @@ class App {
 	}
 
 	_setBackground(){
-		this._scene.background = new THREE.Color(0x50bcdf)
+		this._scene.background = new THREE.Color(0xc4e4fe)
 	}
 
 	_setupControls(){
@@ -38,26 +38,26 @@ class App {
 	_setupCamera() {
 		const width = this._divContainer.clientWidth;
 		const height = this._divContainer.clientHeight;
-		const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-		camera.position.set(8, 20, 40)
-		camera.zoom = 0.4
+		const camera = new THREE.PerspectiveCamera(25, width / height, 0.1, 100);
+		camera.position.set(0, 24, 40)
+		camera.zoom = 0.25
 		this._camera = camera;
 	}
 
 	_setupLight() {
 		const color = 0xffffff;
-		const intensity = 1;
+		const intensity = 1.2;
 		const light = new THREE.DirectionalLight(color, intensity);
-		light.position.set(-1, 5, 2);
+		light.position.set(20, 40, 30);
 		this._scene.add(light);
 	}
 
 	_setupModel() {
 		const baseHeight = 100;
 		const baseWidth = 29;
-		const baseGeometry = new RoundedBoxGeometry(baseWidth,baseHeight,baseWidth, 6,2);
+		const baseGeometry = new RoundedBoxGeometry(baseWidth,baseHeight,baseWidth, 10, 0.3);
 		const baseMaterial = new THREE.MeshPhysicalMaterial({
-			color: 0xff0000,
+			color: 0x37FF33,
 			emissive: 0x000000,
 			roughness: 1,
 			metalness: 0,
@@ -67,8 +67,23 @@ class App {
 			clearcoatRoughness:0
 		})
 		const base = new THREE.Mesh(baseGeometry, baseMaterial);
-		base.position.set(0,- baseHeight /2 )
+		base.position.set(0, - baseHeight /2 )
 		this._scene.add(base);
+
+        const cubeGeometry = new RoundedBoxGeometry(1,1,1,10,0.1);
+        const cubeMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x33CBFF,
+			emissive: 0x000000,
+			roughness: 1,
+			metalness: 0,
+			wireframe: false,
+			flatShading: false,
+			clearcoat:1,
+			clearcoatRoughness:0
+        })
+        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.position.set(0,0.5,0);
+        this._scene.add(cube)
 	}
 
 	resize() {
@@ -89,8 +104,7 @@ class App {
 
 	update(time) {
 		time *= 0.001;
-		// this._cube.rotation.x = time;
-		// this._cube.rotation.y = time;
+		
 	}
 }
 
