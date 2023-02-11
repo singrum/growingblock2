@@ -6,7 +6,16 @@ class App {
 	constructor() {
 		const divContainer = document.querySelector("#webgl_container");
 		this._divContainer = divContainer;
-
+		this.currDirection = 0;
+		this.initDirection;
+		this.xDown
+		this.yDown
+		this.flag = 1;
+		this.len = {"x" : 1, "y" : 1, "z" : 1};
+		this.coordinate = {"x" : 0, "z" : 0};
+		this.appleCoordinate = {"x" : 2, "z" : 2};
+		this.time = 0;
+		this.initMatrix;
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
 		
 		divContainer.appendChild(renderer.domElement);
@@ -20,20 +29,18 @@ class App {
 		this._setupLight();
 		this._setupModel();
 		// this._setupControls();
-		this._setBackground();
-		this._setGameControls();
+		this._setupBackground();
+		this._setupGameControls();
 		window.onresize = this.resize.bind(this);
 		this.resize();
-		this.currDirection = 0
-		this.xDown = null
-		this.yDown = null
 
 		requestAnimationFrame(this.render.bind(this));
+
 		
+
 		
 	}
-	_setGameControls(){
-		
+	_setupGameControls(){
         document.addEventListener('touchstart', this._handleTouchStart.bind(this), false);        
         document.addEventListener('touchmove', this._handleTouchMove.bind(this), false);
         document.addEventListener('keydown', this._keydownEvent(this), false); 
@@ -41,65 +48,64 @@ class App {
         this.yDown = null;
 	}
     _getTouches(evt) {
-        return evt.touches ||             
-                evt.originalEvent.touches; 
-        }                                                     
+        return evt.touches || evt.originalEvent.touches; 
+    }                                                     
                                                                                 
     _handleTouchStart(evt) {
-            const firstTouch = this._getTouches(evt)[0];                                      
-            this.xDown = firstTouch.clientX;                                      
-            this.yDown = firstTouch.clientY;                              
-        }                                               
+		const firstTouch = this._getTouches(evt)[0];                                      
+		this.xDown = firstTouch.clientX;                                      
+		this.yDown = firstTouch.clientY;                              
+    }                                               
                                                                                 
     _handleTouchMove(evt) {
-            if ( ! this.xDown || ! this.yDown ) {
-                return;
-            }
-    
-            let xUp = evt.touches[0].clientX;                                    
-            let yUp = evt.touches[0].clientY;
-    
-            let xDiff = this.xDown - xUp;
-            let yDiff = this.yDown - yUp;
-                                                                                
-            if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
-                if ( xDiff > 0 ) {
-                    this.currDirection = 3; //-x
-                } else {
-                    this.currDirection = 2; //+x
-                }                       
-            } else {
-                if ( yDiff > 0 ) {
-                    this.currDirection = 0; //-z
-                } else { 
-                    this.currDirection = 1; //+z
-                }                                                                 
-            }
-            /* reset values */
-            this.xDown = null;
-            this.yDown = null;     
-			console.log(this.currDirection)
-        }
+		if ( ! this.xDown || ! this.yDown ) {
+			return;
+		}
+
+		let xUp = evt.touches[0].clientX;                                    
+		let yUp = evt.touches[0].clientY;
+
+		let xDiff = this.xDown - xUp;
+		let yDiff = this.yDown - yUp;
+																			
+		if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
+			if ( xDiff > 0 ) {
+				this.currDirection = 3; //-x
+			} else {
+				this.currDirection = 2; //+x
+			}                       
+		} else {
+			if ( yDiff > 0 ) {
+				this.currDirection = 0; //-z
+			} else { 
+				this.currDirection = 1; //+z
+			}                                                                 
+		}
+		/* reset values */
+		this.xDown = null;
+		this.yDown = null;     
+		console.log(this.currDirection)
+    }
     _keydownEvent(e){
-                if(e.keyCode === 37){
-                    this.currDirection = 3;
-                }
-                else if(e.keyCode === 38){
-                    this.currDirection = 0;
-                }
-                else if(e.keyCode === 39){
-                    this.currDirection = 2;
-                }
-                else if(e.keyCode === 40){
-                    this.currDirection = 1;
-                }
-        }
+		if(e.keyCode === 37){
+			this.currDirection = 3;
+		}
+		else if(e.keyCode === 38){
+			this.currDirection = 0;
+		}
+		else if(e.keyCode === 39){
+			this.currDirection = 2;
+		}
+		else if(e.keyCode === 40){
+			this.currDirection = 1;
+		}
+    }
 	
 
 
-	_setBackground(){
+	_setupBackground(){
 		this._scene.background = new THREE.Color(0xc4e4fe)
-		
+		this._scene.fog = new THREE.FogExp2(0xc4e4fe, 0.01)
 	}
 
 
@@ -113,7 +119,7 @@ class App {
 		const height = this._divContainer.clientHeight;
 		const camera = new THREE.PerspectiveCamera(25, width / height, 0.1, 100);
 		camera.position.set(0, 40, 40)
-		camera.zoom = 0.25
+		camera.zoom = 0.4
 		camera.lookAt(0,0,0)
 		this._camera = camera;
 	}
@@ -133,6 +139,14 @@ class App {
 		light.castShadow = true;
 		light.shadow.mapSize.width = light.shadow.mapSize.height = 1024
 		light.shadow.radius = 5
+
+
+		light.shadow.camera.top = light.shadow.camera.right = 20;
+		light.shadow.camera.bottom = light.shadow.camera.left = -20;
+		const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
+		this._scene.add(cameraHelper)
+		
+
 	}
 
 	_setupModel() {
@@ -153,7 +167,7 @@ class App {
 		base.position.set(0, - baseHeight /2 )
 		this._scene.add(base);
 		base.receiveShadow = true;
-
+		this.len.x = 1;this.len.y = 1;this.len.z = 1;
         const cubeGeometry = new RoundedBoxGeometry(1,1,1,10,0.1);
         const cubeMaterial = new THREE.MeshPhysicalMaterial({
             color: 0x33CBFF,
@@ -169,6 +183,31 @@ class App {
         cube.position.set(0,0.5,0);
         this._scene.add(cube)
 		cube.castShadow = true
+		cube.matrixAutoUpdate = false
+		cube.matrix = new THREE.Matrix4().makeTranslation(0, this.len.y / 2, 0)
+		this._cube = cube;
+
+
+		const appleGeometry = new THREE.SphereGeometry(0.5,10,10);
+		const appleMaterial = new THREE.MeshPhysicalMaterial({
+			color: 0xff0000,
+			emissive: 0xff0000,
+			roughness: 1,
+			metalness: 0,
+			wireframe: false,
+			flatShading: false,
+			clearcoat:1,
+			clearcoatRoughness:0
+		})
+		const apple = new THREE.Mesh(appleGeometry,appleMaterial);
+		this._scene.add(apple)
+		apple.castShadow = true
+		apple.matrixAutoUpdate = false
+		// [this.appleCoordinate.x, this.appleCoordinate.z] = [this.rangeRandom(), this.rangeRandom()]
+		apple.matrix = new THREE.Matrix4().makeTranslation(this.appleCoordinate.x,0.5,this.appleCoordinate.z)
+		this._apple = apple;
+
+
 	}
 
 	resize() {
@@ -181,15 +220,116 @@ class App {
 		this._renderer.setSize(width, height);
 	}
 
-	render(time) {
+	render() {
 		this._renderer.render(this._scene, this._camera);
-		this.update(time);
+		this.update();
 		requestAnimationFrame(this.render.bind(this));
 	}
 
-	update(time) {
-		time *= 0.001;
-		console.log(this.currDirection)
+	update() {
+		this.time += 0.1;
+		
+		
+		switch(this.flag){
+			
+			case 0:
+				//roll
+				this._rotate(this.initMatrix, this.time, this.initDirection)
+				if(this.time >= Math.PI/2){
+					this.flag = 1;
+					this.time = 0;
+					this._setLenAndCoordinate(this.initDirection)
+					
+					break;
+				}
+				break;
+			case 1:
+				//check
+				
+				this.initDirection = this.currDirection;
+				this.initMatrix = new THREE.Matrix4().makeTranslation(this.coordinate.x,this.len.y / 2, this.coordinate.z)
+				this.flag = 0;
+
+				if(this._checkEatApple()){
+					console.log("eat")
+					this._makeNewApple()
+				}
+				if(this._checkFall){
+
+				}
+				break;
+			
+		}
+	}
+	_checkEatApple(){
+		if (this.appleCoordinate.x === this.coordinate.x &&
+		this.appleCoordinate.z === this.coordinate.z){
+			return true;
+		}
+	}
+	rangeRandom(){
+		return Math.floor(Math.random() * 29) - (29 - 1)/2;
+	}
+	_makeNewApple(){
+		
+		[this.appleCoordinate.x, this.appleCoordinate.z] = [this.rangeRandom(), this.rangeRandom()]
+		
+		this._apple.matrix = new THREE.Matrix4().makeTranslation(this.appleCoordinate.x,0.5,this.appleCoordinate.z)
+
+	}
+	_setLenAndCoordinate(direction){
+		switch(direction){
+			case 0:
+				[this.len.z, this.len.y] = [this.len.y, this.len.z]
+				this.coordinate.z = this.coordinate.z - this.len.z / 2 - this.len.y / 2		
+				break;
+			case 1:
+				[this.len.z, this.len.y] = [this.len.y, this.len.z]
+				this.coordinate.z = this.coordinate.z + this.len.z / 2 + this.len.y / 2		
+				break;
+			case 2:
+				[this.len.x, this.len.y] = [this.len.y, this.len.x]
+				this.coordinate.x = this.coordinate.x + this.len.x / 2 + this.len.y / 2		
+				break;
+			case 3:
+				[this.len.x, this.len.y] = [this.len.y, this.len.x]
+				this.coordinate.x = this.coordinate.x - this.len.x / 2 - this.len.y / 2		
+				break;
+		}
+	}
+	_rotate(initMatrix, angle, direction){
+		switch(direction){
+			case 0:
+				
+				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(0,0,this.coordinate.z - this.len.z / 2),
+				new THREE.Matrix4().makeRotationX(-angle),
+				new THREE.Matrix4().makeTranslation(0,0,-this.coordinate.z +this.len.z / 2),
+				initMatrix)
+				
+				break;
+			case 1:
+				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(0,0,this.coordinate.z + this.len.z / 2),
+				new THREE.Matrix4().makeRotationX(angle),
+				new THREE.Matrix4().makeTranslation(0,0,-this.coordinate.z - this.len.z / 2),
+				initMatrix)
+				break;
+			case 2:
+				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(this.coordinate.x + this.len.x / 2,0,0),
+				new THREE.Matrix4().makeRotationZ(-angle),
+				new THREE.Matrix4().makeTranslation(-this.coordinate.x - this.len.x / 2,0,0),
+				initMatrix)
+				break;
+			case 3:
+				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(this.coordinate.x - this.len.x / 2,0,0),
+				new THREE.Matrix4().makeRotationZ(angle),
+				new THREE.Matrix4().makeTranslation(-this.coordinate.x + this.len.x / 2,0,0),
+				initMatrix)
+				break;
+		}
+	}
+
+	matmul(...mats){
+		return mats.reduce((prev, curr) => prev.multiply(curr))
 	}
 }
 
