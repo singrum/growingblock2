@@ -13,9 +13,10 @@ class App {
 		this.flag = 1;
 		this.len = {"x" : 1, "y" : 1, "z" : 1};
 		this.coordinate = {"x" : 0, "z" : 0};
-		this.appleCoordinate = {"x" : 2, "z" : 2};
+		// this.appleCoordinate = {"x" : this.rangeRandom(), "z" : this.rangeRandom()};
+		this.appleCoordinate = {"x" : 1, "z" : 0};
 		this.time = 0;
-		this.initMatrix;
+		this.initMatrix = new THREE.Matrix4();
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
 		
 		divContainer.appendChild(renderer.domElement);
@@ -203,7 +204,6 @@ class App {
 		this._scene.add(apple)
 		apple.castShadow = true
 		apple.matrixAutoUpdate = false
-		// [this.appleCoordinate.x, this.appleCoordinate.z] = [this.rangeRandom(), this.rangeRandom()]
 		apple.matrix = new THREE.Matrix4().makeTranslation(this.appleCoordinate.x,0.5,this.appleCoordinate.z)
 		this._apple = apple;
 
@@ -228,12 +228,27 @@ class App {
 
 	update() {
 		this.time += 0.1;
+// //degug
+// 		const geometry = new THREE.BufferGeometry();
+// 		geometry.setAttribute(
+// 			"position",
+// 			new THREE.Float32BufferAttribute([this.coordinate.x,0.1,this.coordinate.z], 3)
+// 		);
+
+// 		const material = new THREE.PointsMaterial({
+// 			color:0xff0000,
+// 			size: 5,
+// 			sizeAttenuation : false
+// 		})
+// 		const points = new THREE.Points(geometry, material);
+// 		this._scene.add(points)
 		
-		
+
+// 		//
 		switch(this.flag){
 			
 			case 0:
-				//roll
+				// roll
 				this._rotate(this.initMatrix, this.time, this.initDirection)
 				if(this.time >= Math.PI/2){
 					this.flag = 1;
@@ -244,56 +259,81 @@ class App {
 				}
 				break;
 			case 1:
-				//check
+				// check
+				console.log(this.coordinate)
 				
 				this.initDirection = this.currDirection;
-				this.initMatrix = new THREE.Matrix4().makeTranslation(this.coordinate.x,this.len.y / 2, this.coordinate.z)
+				
 				this.flag = 0;
 
 				if(this._checkEatApple()){
 					console.log("eat")
 					this._makeNewApple()
+					this.flag = 2;
 				}
 				if(this._checkFall){
 
 				}
 				break;
+			case 2:
+				// grow
+				
+				this._cube.matrix = this.matmul(new THREE.Matrix4().makeScale(1,(this.len.y + this.time)/this.len.y ,1),
+					new THREE.Matrix4().makeTranslation(this.coordinate.x,this.len.y / 2, this.coordinate.z),
+					this.initMatrix)
+				
+				
+				if (this.time >= 1){
+					this.time = 0;
+					this._cube.matrix = this.matmul(new THREE.Matrix4().makeScale(1,(this.len.y + 1)/this.len.y,1),
+						new THREE.Matrix4().makeTranslation(this.coordinate.x,this.len.y / 2, this.coordinate.z),
+						this.initMatrix)
+					this.initMatrix = this.matmul(new THREE.Matrix4().makeScale(1,(this.len.y + 1)/this.len.y,1), this.initMatrix);
+					this.len.y += 1;
+					this.flag = 0;
+				}
+				
+				break;
+				
 			
 		}
 	}
 	_checkEatApple(){
-		if (this.appleCoordinate.x === this.coordinate.x &&
-		this.appleCoordinate.z === this.coordinate.z){
+		if (this.coordinate.x - this.len.x / 2 <= this.appleCoordinate.x &&
+			this.coordinate.x + this.len.x / 2 >= this.appleCoordinate.x &&
+			this.coordinate.z - this.len.z / 2 <= this.appleCoordinate.z &&
+			this.coordinate.z + this.len.z / 2 >= this.appleCoordinate.z)
 			return true;
-		}
+		
 	}
 	rangeRandom(){
 		return Math.floor(Math.random() * 29) - (29 - 1)/2;
 	}
-	_makeNewApple(){
-		
+	_makeNewApple(){	
 		[this.appleCoordinate.x, this.appleCoordinate.z] = [this.rangeRandom(), this.rangeRandom()]
-		
 		this._apple.matrix = new THREE.Matrix4().makeTranslation(this.appleCoordinate.x,0.5,this.appleCoordinate.z)
-
 	}
 	_setLenAndCoordinate(direction){
 		switch(direction){
 			case 0:
 				[this.len.z, this.len.y] = [this.len.y, this.len.z]
 				this.coordinate.z = this.coordinate.z - this.len.z / 2 - this.len.y / 2		
+				this.initMatrix = this.matmul(new THREE.Matrix4().makeRotationX(Math.PI/2), this.initMatrix);
 				break;
 			case 1:
 				[this.len.z, this.len.y] = [this.len.y, this.len.z]
 				this.coordinate.z = this.coordinate.z + this.len.z / 2 + this.len.y / 2		
+				this.initMatrix = this.matmul(new THREE.Matrix4().makeRotationX(Math.PI/2), this.initMatrix);
 				break;
 			case 2:
 				[this.len.x, this.len.y] = [this.len.y, this.len.x]
 				this.coordinate.x = this.coordinate.x + this.len.x / 2 + this.len.y / 2		
+				this.initMatrix = this.matmul(new THREE.Matrix4().makeRotationZ(Math.PI/2), this.initMatrix);
 				break;
 			case 3:
 				[this.len.x, this.len.y] = [this.len.y, this.len.x]
 				this.coordinate.x = this.coordinate.x - this.len.x / 2 - this.len.y / 2		
+				this.initMatrix = this.matmul(new THREE.Matrix4().makeRotationZ(Math.PI/2), this.initMatrix);
 				break;
 		}
 	}
@@ -301,28 +341,28 @@ class App {
 		switch(direction){
 			case 0:
 				
-				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(0,0,this.coordinate.z - this.len.z / 2),
+				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(this.coordinate.x,0,this.coordinate.z - this.len.z / 2),
 				new THREE.Matrix4().makeRotationX(-angle),
-				new THREE.Matrix4().makeTranslation(0,0,-this.coordinate.z +this.len.z / 2),
+				new THREE.Matrix4().makeTranslation(0,this.len.y / 2,this.len.z / 2),
 				initMatrix)
 				
 				break;
 			case 1:
-				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(0,0,this.coordinate.z + this.len.z / 2),
+				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(this.coordinate.x,0,this.coordinate.z + this.len.z / 2),
 				new THREE.Matrix4().makeRotationX(angle),
-				new THREE.Matrix4().makeTranslation(0,0,-this.coordinate.z - this.len.z / 2),
+				new THREE.Matrix4().makeTranslation(0,this.len.y /2 ,-this.len.z / 2),
 				initMatrix)
 				break;
 			case 2:
-				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(this.coordinate.x + this.len.x / 2,0,0),
+				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(this.coordinate.x + this.len.x / 2,0,this.coordinate.z),
 				new THREE.Matrix4().makeRotationZ(-angle),
-				new THREE.Matrix4().makeTranslation(-this.coordinate.x - this.len.x / 2,0,0),
+				new THREE.Matrix4().makeTranslation(-this.len.x / 2,this.len.y /2 ,0),
 				initMatrix)
 				break;
 			case 3:
-				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(this.coordinate.x - this.len.x / 2,0,0),
+				this._cube.matrix = this.matmul(new THREE.Matrix4().makeTranslation(this.coordinate.x - this.len.x / 2,0,this.coordinate.z),
 				new THREE.Matrix4().makeRotationZ(angle),
-				new THREE.Matrix4().makeTranslation(-this.coordinate.x + this.len.x / 2,0,0),
+				new THREE.Matrix4().makeTranslation(this.len.x / 2,this.len.y /2 ,0),
 				initMatrix)
 				break;
 		}
