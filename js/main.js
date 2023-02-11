@@ -11,6 +11,7 @@ class App {
 		
 		divContainer.appendChild(renderer.domElement);
 		this._renderer = renderer;
+		renderer.shadowMap.enabled = true;
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		const scene = new THREE.Scene();
 		this._scene = scene;
@@ -18,18 +19,90 @@ class App {
 		this._setupCamera();
 		this._setupLight();
 		this._setupModel();
-		this._setupControls();
+		// this._setupControls();
 		this._setBackground();
-
+		this._setGameControls();
 		window.onresize = this.resize.bind(this);
 		this.resize();
+		this.currDirection = 0
+		this.xDown = null
+		this.yDown = null
 
 		requestAnimationFrame(this.render.bind(this));
+		
+		
 	}
+	_setGameControls(){
+		
+        document.addEventListener('touchstart', this._handleTouchStart.bind(this), false);        
+        document.addEventListener('touchmove', this._handleTouchMove.bind(this), false);
+        document.addEventListener('keydown', this._keydownEvent(this), false); 
+        this.xDown = null;                                                        
+        this.yDown = null;
+	}
+    _getTouches(evt) {
+        return evt.touches ||             
+                evt.originalEvent.touches; 
+        }                                                     
+                                                                                
+    _handleTouchStart(evt) {
+            const firstTouch = this._getTouches(evt)[0];                                      
+            this.xDown = firstTouch.clientX;                                      
+            this.yDown = firstTouch.clientY;                              
+        }                                               
+                                                                                
+    _handleTouchMove(evt) {
+            if ( ! this.xDown || ! this.yDown ) {
+                return;
+            }
+    
+            let xUp = evt.touches[0].clientX;                                    
+            let yUp = evt.touches[0].clientY;
+    
+            let xDiff = this.xDown - xUp;
+            let yDiff = this.yDown - yUp;
+                                                                                
+            if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
+                if ( xDiff > 0 ) {
+                    this.currDirection = 3; //-x
+                } else {
+                    this.currDirection = 2; //+x
+                }                       
+            } else {
+                if ( yDiff > 0 ) {
+                    this.currDirection = 0; //-z
+                } else { 
+                    this.currDirection = 1; //+z
+                }                                                                 
+            }
+            /* reset values */
+            this.xDown = null;
+            this.yDown = null;     
+			console.log(this.currDirection)
+        }
+    _keydownEvent(e){
+                if(e.keyCode === 37){
+                    this.currDirection = 3;
+                }
+                else if(e.keyCode === 38){
+                    this.currDirection = 0;
+                }
+                else if(e.keyCode === 39){
+                    this.currDirection = 2;
+                }
+                else if(e.keyCode === 40){
+                    this.currDirection = 1;
+                }
+        }
+	
+
 
 	_setBackground(){
 		this._scene.background = new THREE.Color(0xc4e4fe)
+		
 	}
+
+
 
 	_setupControls(){
 		new OrbitControls(this._camera, this._divContainer);
@@ -39,17 +112,27 @@ class App {
 		const width = this._divContainer.clientWidth;
 		const height = this._divContainer.clientHeight;
 		const camera = new THREE.PerspectiveCamera(25, width / height, 0.1, 100);
-		camera.position.set(0, 24, 40)
+		camera.position.set(0, 40, 40)
 		camera.zoom = 0.25
+		camera.lookAt(0,0,0)
 		this._camera = camera;
 	}
 
 	_setupLight() {
+		const auxLight = new THREE.DirectionalLight(0xffffff, 0.7);
+		auxLight.position.set(20, 40, 30);
+		this._scene.add(auxLight);
+
+
+
 		const color = 0xffffff;
-		const intensity = 1.2;
+		const intensity = 0.6;
 		const light = new THREE.DirectionalLight(color, intensity);
 		light.position.set(20, 40, 30);
 		this._scene.add(light);
+		light.castShadow = true;
+		light.shadow.mapSize.width = light.shadow.mapSize.height = 1024
+		light.shadow.radius = 5
 	}
 
 	_setupModel() {
@@ -69,6 +152,7 @@ class App {
 		const base = new THREE.Mesh(baseGeometry, baseMaterial);
 		base.position.set(0, - baseHeight /2 )
 		this._scene.add(base);
+		base.receiveShadow = true;
 
         const cubeGeometry = new RoundedBoxGeometry(1,1,1,10,0.1);
         const cubeMaterial = new THREE.MeshPhysicalMaterial({
@@ -84,6 +168,7 @@ class App {
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
         cube.position.set(0,0.5,0);
         this._scene.add(cube)
+		cube.castShadow = true
 	}
 
 	resize() {
@@ -104,7 +189,7 @@ class App {
 
 	update(time) {
 		time *= 0.001;
-		
+		console.log(this.currDirection)
 	}
 }
 
