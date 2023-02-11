@@ -48,7 +48,6 @@ class App {
 		this._setupCamera();
 		this._setupLight();
 		this._setupModel();
-		// this._setupControls();
 		this._setupBackground();
 		this._setupGameControls();
 		window.onresize = this.resize.bind(this);
@@ -125,14 +124,10 @@ class App {
 
 	_setupBackground(){
 		this._scene.background = new THREE.Color(0xc4e4fe)
-		this._scene.fog = new THREE.FogExp2(0xc4e4fe, 0.01)
+		
 	}
 
 
-
-	_setupControls(){
-		new OrbitControls(this._camera, this._divContainer);
-	}
 
 	_setupCamera() {
 		const width = this._divContainer.clientWidth;
@@ -163,8 +158,6 @@ class App {
 
 		light.shadow.camera.top = light.shadow.camera.right = 20;
 		light.shadow.camera.bottom = light.shadow.camera.left = -20;
-		const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
-		this._scene.add(cameraHelper)
 		
 
 	}
@@ -246,23 +239,6 @@ class App {
 
 	update() {
 		this.time += 0.07;
-// //degug
-// 		const geometry = new THREE.BufferGeometry();
-// 		geometry.setAttribute(
-// 			"position",
-// 			new THREE.Float32BufferAttribute([this.coordinate.x,0.1,this.coordinate.z], 3)
-// 		);
-
-// 		const material = new THREE.PointsMaterial({
-// 			color:0xff0000,
-// 			size: 5,
-// 			sizeAttenuation : false
-// 		})
-// 		const points = new THREE.Points(geometry, material);
-// 		this._scene.add(points)
-		
-
-// 		//
 		switch(this.flag){
 			
 			case 0:
