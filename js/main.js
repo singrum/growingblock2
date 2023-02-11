@@ -64,7 +64,7 @@ class App {
 	_setupGameControls(){
         document.addEventListener('touchstart', this._handleTouchStart.bind(this), false);        
         document.addEventListener('touchmove', this._handleTouchMove.bind(this), false);
-        document.addEventListener('keydown', this._keydownEvent(this), false); 
+        document.addEventListener('keydown', this._keydownEvent.bind(this), false); 
         this.xDown = null;                                                        
         this.yDown = null;
 	}
@@ -140,7 +140,7 @@ class App {
 		const height = this._divContainer.clientHeight;
 		const camera = new THREE.PerspectiveCamera(25, width / height, 0.1, 100);
 		camera.position.set(0, 40, 40)
-		camera.zoom = 0.4
+		camera.zoom = 0.32
 		camera.lookAt(0,0,0)
 		this._camera = camera;
 	}
