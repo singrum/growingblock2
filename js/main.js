@@ -124,7 +124,7 @@ class App {
 
 	_setupBackground(){
 		this._scene.background = new THREE.Color(0xc4e4fe)
-		
+		this._scene.fog = new THREE.FogExp2(0xc4e4fe, 0.01)
 	}
 
 
