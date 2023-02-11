@@ -309,6 +309,7 @@ class App {
 					this.initMatrix = this.matmul(new THREE.Matrix4().makeScale(1,(this.len.y + 1)/this.len.y,1), this.initMatrix);
 					this.len.y += 1;
 					this.flag = 0;
+					this.initDirection = this.currDirection;
 				}
 				
 				break;
