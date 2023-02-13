@@ -18,7 +18,7 @@ class App {
 			</div>
     	</div>`
 		document.querySelector("#restart").addEventListener("click", ()=>{
-			new App();
+			location.reload()
 		})
 		this.once = true
 		const scoreBoard = document.querySelector("#score");
