@@ -211,6 +211,7 @@ class App {
 			metalness: 0,
 			wireframe: false,
 			flatShading: false,
+			emissive: 0xff0000,
 			clearcoat:1,
 			clearcoatRoughness:0
 		})
