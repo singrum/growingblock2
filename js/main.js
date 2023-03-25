@@ -44,6 +44,7 @@ class App {
 		
 		divContainer.appendChild(renderer.domElement);
 		this._renderer = renderer;
+		renderer.setPixelRatio( window.devicePixelRatio )
 		renderer.shadowMap.enabled = true;
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		const scene = new THREE.Scene();
