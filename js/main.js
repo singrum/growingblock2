@@ -5,7 +5,10 @@ class App {
 	constructor() {
 		document.querySelector("body").innerHTML = 
 		`<div id="webgl_container"></div>
-		<div id = "score">score : 0</div>
+		<div id = "scoreWrap">
+		<div id = "score">0</div>
+		</div>
+		
 		<div class="modal fade" id="loseModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content" style="background-color: rgba(0,0,0,0); border-color: rgba(0,0,0,0);">
@@ -203,7 +206,7 @@ class App {
 		const appleGeometry = new THREE.SphereGeometry(0.5,10,10);
 		const appleMaterial = new THREE.MeshPhysicalMaterial({
 			color: 0xff0000,
-			emissive: 0xff0000,
+			// emissive: 0xff0000,
 			roughness: 1,
 			metalness: 0,
 			wireframe: false,
@@ -261,7 +264,7 @@ class App {
 
 				if(this._checkEatApple()){
 					this.score++;
-					this.scoreBoard.innerHTML = `score : ${this.score}`;
+					this.scoreBoard.innerHTML = `${this.score}`;
 					this._makeNewApple()
 					this.flag = 2;
 				}
