@@ -205,7 +205,7 @@ class App {
 		this._cube = cube;
 
 
-		const appleGeometry = new THREE.SphereGeometry(0.5,10,10);
+		const appleGeometry = new THREE.SphereGeometry(0.5,32,64);
 		const appleMaterial = new THREE.MeshPhysicalMaterial({
 			color: 0xff0000,
 			// emissive: 0xff0000,
@@ -213,7 +213,7 @@ class App {
 			metalness: 0,
 			wireframe: false,
 			flatShading: false,
-			emissive: 0xff0000,
+			emissive: 0xff0f0f,
 			clearcoat:1,
 			clearcoatRoughness:0
 		})
