@@ -40,6 +40,8 @@ class App {
 		this.time = 0;
 		this.initMatrix = new THREE.Matrix4();
 		this.baseWidth = 29
+		this.time = 0;
+		this.prevTime = performance.now()
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
 		
 		divContainer.appendChild(renderer.domElement);
@@ -244,7 +246,11 @@ class App {
 	}
 
 	update() {
-		this.time += 0.07;
+		const currentTime = performance.now();
+		this.deltaTime = (currentTime - this.prevTime) / 1000 * 6;
+		this.prevTime = currentTime;
+        this.time += this.deltaTime 
+		
 		switch(this.flag){
 			
 			case 0:
